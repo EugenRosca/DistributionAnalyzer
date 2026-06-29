@@ -10,11 +10,14 @@ await webR.init();
 
 output.textContent = "WebR loaded successfully.";
 
-document.getElementById("runButton").onclick = async () => {
+document.getElementById("runButton").addEventListener("click", async () => {
+
     output.textContent = "Running R...";
 
-    const result = await webR.evalR("2+2");
+    const result = await webR.evalR("2 + 2");
+
     const value = await result.toJs();
 
     output.textContent = "Result from R = " + value;
-};
+
+});
