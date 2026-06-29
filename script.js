@@ -1,18 +1,17 @@
-alert("script.js loaded");
-
 const fileInput = document.getElementById("csvFile");
 const fileName = document.getElementById("fileName");
 
-console.log(fileInput);
+fileInput.addEventListener("change", () => {
 
-fileInput.addEventListener("change", function () {
+    console.log(fileInput.files);
 
-    alert("change event");
-
-    console.log(this.files);
-
-    if (this.files.length > 0) {
-        fileName.textContent = this.files[0].name;
+    if (fileInput.files.length === 0) {
+        fileName.textContent = "No file selected";
+        return;
     }
+
+    fileName.textContent = fileInput.files[0].name;
+
+    console.log("Filename:", fileInput.files[0].name);
 
 });
