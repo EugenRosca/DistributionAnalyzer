@@ -2,22 +2,16 @@ import { WebR } from "https://webr.r-wasm.org/latest/webr.mjs";
 
 const output = document.getElementById("output");
 
-output.textContent = "Loading WebR...";
-
 const webR = new WebR();
 
 await webR.init();
 
 output.textContent = "WebR loaded successfully.";
 
-document.getElementById("runButton").addEventListener("click", async () => {
-
-    output.textContent = "Running R...";
+document.getElementById("runButton").onclick = async () => {
 
     const result = await webR.evalR("2 + 2");
 
-    const value = await result.toArray();
+    output.textContent = await result.toString();
 
-    output.textContent = "Result from R = " + value[0];
-
-});
+};
