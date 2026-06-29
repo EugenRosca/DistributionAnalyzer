@@ -1,57 +1,20 @@
-body{
+import { WebR } from "https://webr.r-wasm.org/latest/webr.mjs";
 
-font-family:Arial,Helvetica,sans-serif;
+const output = document.getElementById("output");
 
-background:#f4f4f4;
+output.textContent = "Loading WebR...";
 
-margin:0;
+const webR = new WebR();
 
-padding:40px;
+await webR.init();
 
-}
+output.textContent = "WebR loaded successfully.";
 
-.container{
+document.getElementById("runButton").onclick = async () => {
+    output.textContent = "Running R...";
 
-max-width:700px;
+    const result = await webR.evalR("2+2");
+    const value = await result.toJs();
 
-margin:auto;
-
-background:white;
-
-padding:30px;
-
-border-radius:10px;
-
-box-shadow:0 5px 20px rgba(0,0,0,.15);
-
-}
-
-h1{
-
-margin-top:0;
-
-}
-
-button{
-
-padding:12px 20px;
-
-font-size:16px;
-
-cursor:pointer;
-
-margin-top:20px;
-
-}
-
-pre{
-
-background:#efefef;
-
-padding:20px;
-
-margin-top:25px;
-
-white-space:pre-wrap;
-
-}
+    output.textContent = "Result from R = " + value;
+};
