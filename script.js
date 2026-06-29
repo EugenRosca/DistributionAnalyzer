@@ -1,21 +1,15 @@
-import { WebR } from "https://webr.r-wasm.org/latest/webr.mjs";
+const fileInput = document.getElementById("csvFile");
+const fileName = document.getElementById("fileName");
 
-const output = document.getElementById("output");
+fileInput.addEventListener("change", function () {
 
-output.textContent = "Loading WebR...";
+    if (this.files.length === 0) {
 
-const webR = new WebR();
+        fileName.textContent = "No file selected";
+        return;
 
-await webR.init();
+    }
 
-output.textContent = "WebR loaded successfully.";
-
-document.getElementById("runButton").addEventListener("click", async () => {
-
-    const result = await webR.evalR("2 + 2");
-
-    console.log(result);
-
-    output.textContent = JSON.stringify(result);
+    fileName.textContent = this.files[0].name;
 
 });
