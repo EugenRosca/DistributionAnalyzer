@@ -1,16 +1,12 @@
-console.log('🔥 Script încărcat');
+// Folosește import pentru WebR
+import { WebR } from 'webr';
 
-// Verifică dacă WebR este disponibil
-if (typeof WebR === 'undefined') {
-    console.error('❌ WebR nu este definit! Verifică încărcarea CDN-ului.');
-    document.getElementById('loadingStatus').textContent = '❌ Eroare: WebR nu s-a încărcat. Verifică conexiunea.';
-    document.getElementById('loadingStatus').style.color = '#e74c3c';
-}
+console.log('🔥 Script încărcat cu import WebR');
 
 let webrInstance = null;
 let isInitialized = false;
 
-// Funcția runRCode disponibilă GLOBAL
+// Funcția runRCode - disponibilă global pentru buton
 window.runRCode = async function() {
     console.log('▶️ runRCode() apelat');
     
@@ -28,10 +24,6 @@ window.runRCode = async function() {
     if (statusElement) statusElement.textContent = '⏳ Procesare...';
     
     try {
-        if (typeof WebR === 'undefined') {
-            throw new Error('WebR nu este disponibil. Verifică conexiunea la internet.');
-        }
-        
         if (!webrInstance || !isInitialized) {
             console.log('⏳ WebR nu e gata, inițializez...');
             await initWebR();
@@ -59,7 +51,7 @@ window.runRCode = async function() {
             return;
         }
         
-        // COD R SIMPLIFICAT (FĂRĂ PACHETE EXTERNE INITIAL)
+        // COD R - folosește base R (fără pachete externe)
         const rCode = `
             # Datele utilizatorului
             data <- data.frame(
@@ -85,30 +77,51 @@ window.runRCode = async function() {
                 "📊 Deviație standard: ", round(sd_val, 2), "\n",
                 "📊 Minim: ", min(data$y), "\n",
                 "📊 Maxim: ", max(data$y), "\n",
+                "📊 Range: ", round(max(data$y) - min(data$y), 2), "\n",
                 "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
             )
             
-            # Grafic simplu (fără ggplot2, folosind base R)
+            # Grafic cu base R
             svg("plot.svg", width = 10, height = 6)
+            
+            # Setează margini
+            par(mar = c(5, 5, 4, 2))
+            
+            # Creează graficul
             plot(data$x, data$y, 
                  type = "b", 
-                 col = "blue", 
+                 col = "#4A90D9", 
                  pch = 19, 
                  cex = 1.5,
-                 main = "Graficul datelor introduse",
+                 lwd = 2,
+                 main = "📈 Graficul datelor introduse",
                  xlab = "Index observație",
                  ylab = "Valoare",
                  col.main = "#2c3e50",
-                 font.main = 2)
-            abline(h = media, col = "green", lty = 2, lwd = 2)
+                 font.main = 2,
+                 cex.main = 1.5,
+                 cex.lab = 1.2,
+                 cex.axis = 1.1)
+            
+            # Adaugă linia pentru medie
+            abline(h = media, col = "#2ECC71", lty = 2, lwd = 2.5)
+            
+            # Adaugă legendă
             legend("topright", 
                    legend = c("Date", paste("Media =", round(media, 2))),
-                   col = c("blue", "green"),
+                   col = c("#4A90D9", "#2ECC71"),
                    lty = c(1, 2),
                    pch = c(19, NA),
-                   lwd = c(1, 2))
+                   lwd = c(2, 2.5),
+                   bg = "white",
+                   cex = 1.1)
+            
+            # Adaugă grid
+            grid(nx = NULL, ny = NULL, col = "#E8E8E8", lty = 1)
+            
             dev.off()
             
+            # Citește SVG-ul
             list(
                 text = rezultat,
                 plot = readLines("plot.svg", warn = FALSE)
@@ -129,7 +142,11 @@ window.runRCode = async function() {
         }
         
         if (plotElement && plotSVG && plotSVG.length > 0) {
-            plotElement.innerHTML = plotSVG.join('\n');
+            // Curăță SVG-ul de caracterele speciale
+            let svgContent = plotSVG.join('\n');
+            // Elimină liniile goale și caracterele de control
+            svgContent = svgContent.replace(/[\x00-\x1F\x7F-\x9F]/g, '');
+            plotElement.innerHTML = svgContent;
             console.log('✅ Grafic afișat');
         } else if (plotElement) {
             plotElement.innerHTML = '<p style="color:orange;">⚠️ Graficul nu a fost generat</p>';
@@ -163,18 +180,10 @@ async function initWebR() {
             status.style.color = '#666';
         }
         
-        // Verifică dacă WebR există
-        if (typeof WebR === 'undefined') {
-            throw new Error('WebR nu este disponibil. Verifică conexiunea la internet și reîmprospătează pagina.');
-        }
-        
+        // Creează instanța WebR
         webrInstance = new WebR();
         await webrInstance.init();
         console.log('✅ WebR inițializat');
-        
-        if (status) {
-            status.textContent = '⏳ Se pregătește...';
-        }
         
         isInitialized = true;
         
@@ -204,34 +213,20 @@ async function initWebR() {
 }
 
 // Pornește la încărcare
-window.addEventListener('load', function() {
-    console.log('🚀 Pagina încărcată');
-    
-    // Adaugă event listener pentru buton
-    const button = document.getElementById('runButton');
-    if (button) {
-        button.addEventListener('click', window.runRCode);
-        console.log('✅ Buton configurat');
-    } else {
-        console.warn('⚠️ Butonul #runButton nu există');
-    }
-    
-    // Verifică dacă WebR e definit
-    if (typeof WebR === 'undefined') {
-        console.error('❌ WebR NU este definit!');
-        const status = document.getElementById('loadingStatus');
-        if (status) {
-            status.textContent = '❌ Eroare: WebR nu s-a încărcat. Verifică conexiunea la internet.';
-            status.style.color = '#e74c3c';
-        }
-        return;
-    }
-    
-    // Inițializează WebR
-    setTimeout(() => {
-        initWebR();
-    }, 1000);
-});
+console.log('🚀 Inițializare aplicație...');
+
+// Adaugă event listener pentru buton
+const button = document.getElementById('runButton');
+if (button) {
+    button.addEventListener('click', window.runRCode);
+    console.log('✅ Buton configurat');
+} else {
+    console.warn('⚠️ Butonul #runButton nu există');
+}
+
+// Inițializează WebR
+setTimeout(() => {
+    initWebR();
+}, 1000);
 
 console.log('✅ Script încărcat complet');
-console.log('📌 WebR disponibil:', typeof WebR !== 'undefined' ? '✅ Da' : '❌ Nu');
