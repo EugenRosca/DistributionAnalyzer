@@ -5,10 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Analiză date cu R</title>
     
-    <!-- WebR -->
-    <script src="https://webr.r-wasm.org/v0.2.0/webr.js"></script>
-    <!-- Shiny pentru WebR -->
-    <script src="https://webr.r-wasm.org/v0.2.0/shiny.js"></script>
+    <!-- Importmap pentru WebR - METODA OFICIALĂ -->
+    <script type="importmap">
+    {
+        "imports": {
+            "webr": "https://webr.r-wasm.org/v0.2.0/webr.mjs"
+        }
+    }
+    </script>
     
     <style>
         * {
@@ -161,6 +165,7 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <!-- Folosim type="module" pentru a putea folosi import -->
+    <script type="module" src="script.js"></script>
 </body>
 </html>
