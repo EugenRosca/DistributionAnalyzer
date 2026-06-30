@@ -1,11 +1,7 @@
 console.log('🔥 Script încărcat');
 
 // Verifică dacă WebR este disponibil
-if (typeof WebR === 'undefined') {
-    console.error('❌ WebR nu este definit!');
-    document.getElementById('loadingStatus').textContent = '❌ Eroare: WebR nu s-a încărcat. Verifică conexiunea.';
-    document.getElementById('loadingStatus').style.color = '#e74c3c';
-}
+console.log('📌 WebR disponibil?', typeof WebR !== 'undefined' ? '✅ DA' : '❌ NU');
 
 let webrInstance = null;
 let isInitialized = false;
@@ -22,7 +18,7 @@ async function initWebR() {
         
         // Verifică dacă WebR există
         if (typeof WebR === 'undefined') {
-            throw new Error('WebR nu este disponibil. Încearcă să reîmprospătezi pagina.');
+            throw new Error('WebR nu este disponibil. Verifică conexiunea la internet.');
         }
         
         // Creează instanța WebR
@@ -106,7 +102,7 @@ async function runRCode() {
             return;
         }
         
-        // COD R - folosește base R (fără pachete externe)
+        // COD R
         const rCode = `
             # Datele utilizatorului
             data <- data.frame(
