@@ -1,7 +1,33 @@
 console.log('🔥 Script încărcat');
 
-// Verifică dacă WebR este disponibil
-console.log('📌 WebR disponibil?', typeof WebR !== 'undefined' ? '✅ DA' : '❌ NU');
+// Așteaptă încărcarea WebR
+function waitForWebR() {
+    return new Promise((resolve) => {
+        let attempts = 0;
+        const maxAttempts = 60; // 6 secunde
+        
+        function check() {
+            attempts++;
+            console.log(`📌 Verific WebR (${attempts}/${maxAttempts})...`);
+            
+            if (typeof WebR !== 'undefined') {
+                console.log('✅ WebR găsit!');
+                resolve(true);
+                return;
+            }
+            
+            if (attempts >= maxAttempts) {
+                console.error('❌ WebR nu s-a încărcat');
+                resolve(false);
+                return;
+            }
+            
+            setTimeout(check, 100);
+        }
+        
+        check();
+    });
+}
 
 let webrInstance = null;
 let isInitialized = false;
@@ -12,16 +38,18 @@ async function initWebR() {
     try {
         const status = document.getElementById('loadingStatus');
         if (status) {
-            status.textContent = '⏳ Inițializare WebR... (10-20 secunde)';
+            status.textContent = '⏳ Se încarcă WebR... (10-20 secunde)';
             status.style.color = '#666';
         }
         
-        // Verifică dacă WebR există
-        if (typeof WebR === 'undefined') {
-            throw new Error('WebR nu este disponibil. Verifică conexiunea la internet.');
+        // Așteaptă să se încarce WebR
+        const loaded = await waitForWebR();
+        
+        if (!loaded || typeof WebR === 'undefined') {
+            throw new Error('WebR nu s-a încărcat. Verifică conexiunea la internet.');
         }
         
-        // Creează instanța WebR
+        console.log('🔄 Creez instanță WebR...');
         webrInstance = new WebR();
         await webrInstance.init();
         console.log('✅ WebR inițializat');
