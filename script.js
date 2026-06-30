@@ -1,13 +1,55 @@
-// Folosește import pentru WebR
-const { WebR } = window;
+// Importă WebR
+import { WebR } from 'webr';
 
 console.log('🔥 Script încărcat cu import WebR');
 
 let webrInstance = null;
 let isInitialized = false;
 
-// Funcția runRCode - disponibilă global pentru buton
-window.runRCode = async function() {
+// Funcția de inițializare
+async function initWebR() {
+    console.log('🔄 Inițializez WebR...');
+    try {
+        const status = document.getElementById('loadingStatus');
+        if (status) {
+            status.textContent = '⏳ Inițializare WebR... (10-20 secunde)';
+            status.style.color = '#666';
+        }
+        
+        // Creează instanța WebR
+        webrInstance = new WebR();
+        await webrInstance.init();
+        console.log('✅ WebR inițializat');
+        
+        isInitialized = true;
+        
+        if (status) {
+            status.textContent = '✅ Gata! Apasă "Rulează R" pentru a începe';
+            status.style.color = '#2ECC71';
+        }
+        
+        console.log('✅ Totul e gata!');
+        
+        // Rulează automat după 2 secunde
+        setTimeout(() => {
+            console.log('🔄 Rulează exemplul automat...');
+            runRCode();
+        }, 2000);
+        
+        return webrInstance;
+    } catch (error) {
+        console.error('❌ Eroare inițializare:', error);
+        const status = document.getElementById('loadingStatus');
+        if (status) {
+            status.textContent = '❌ Eroare: ' + error.message;
+            status.style.color = '#E74C3C';
+        }
+        return null;
+    }
+}
+
+// Funcția principală
+async function runRCode() {
     console.log('▶️ runRCode() apelat');
     
     const resultElement = document.getElementById('result');
@@ -51,7 +93,7 @@ window.runRCode = async function() {
             return;
         }
         
-        // COD R - folosește base R (fără pachete externe)
+        // COD R
         const rCode = `
             # Datele utilizatorului
             data <- data.frame(
@@ -142,9 +184,7 @@ window.runRCode = async function() {
         }
         
         if (plotElement && plotSVG && plotSVG.length > 0) {
-            // Curăță SVG-ul de caracterele speciale
             let svgContent = plotSVG.join('\n');
-            // Elimină liniile goale și caracterele de control
             svgContent = svgContent.replace(/[\x00-\x1F\x7F-\x9F]/g, '');
             plotElement.innerHTML = svgContent;
             console.log('✅ Grafic afișat');
@@ -168,49 +208,10 @@ window.runRCode = async function() {
             statusElement.style.color = '#e74c3c';
         }
     }
-};
-
-// Funcția de inițializare
-async function initWebR() {
-    console.log('🔄 Inițializez WebR...');
-    try {
-        const status = document.getElementById('loadingStatus');
-        if (status) {
-            status.textContent = '⏳ Inițializare WebR... (10-20 secunde)';
-            status.style.color = '#666';
-        }
-        
-        // Creează instanța WebR
-        webrInstance = new WebR();
-        await webrInstance.init();
-        console.log('✅ WebR inițializat');
-        
-        isInitialized = true;
-        
-        if (status) {
-            status.textContent = '✅ Gata! Apasă "Rulează R" pentru a începe';
-            status.style.color = '#2ECC71';
-        }
-        
-        console.log('✅ Totul e gata!');
-        
-        // Rulează automat după 2 secunde
-        setTimeout(() => {
-            console.log('🔄 Rulează exemplul automat...');
-            window.runRCode();
-        }, 2000);
-        
-        return webrInstance;
-    } catch (error) {
-        console.error('❌ Eroare inițializare:', error);
-        const status = document.getElementById('loadingStatus');
-        if (status) {
-            status.textContent = '❌ Eroare: ' + error.message;
-            status.style.color = '#E74C3C';
-        }
-        return null;
-    }
 }
+
+// Expune funcția global pentru buton
+window.runRCode = runRCode;
 
 // Pornește la încărcare
 console.log('🚀 Inițializare aplicație...');
@@ -218,7 +219,10 @@ console.log('🚀 Inițializare aplicație...');
 // Adaugă event listener pentru buton
 const button = document.getElementById('runButton');
 if (button) {
-    button.addEventListener('click', window.runRCode);
+    button.addEventListener('click', () => {
+        console.log('🖱️ Buton apăsat');
+        runRCode();
+    });
     console.log('✅ Buton configurat');
 } else {
     console.warn('⚠️ Butonul #runButton nu există');
