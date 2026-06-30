@@ -1,9 +1,11 @@
 console.log('🔥 Script încărcat');
 
-// Import WebR cu opțiuni pentru a dezactiva ServiceWorker
-import { WebR } from 'webr';
-
-console.log('✅ WebR importat');
+// Verifică dacă WebR este disponibil
+if (typeof WebR === 'undefined') {
+    console.error('❌ WebR nu este definit!');
+    document.getElementById('loadingStatus').textContent = '❌ Eroare: WebR nu s-a încărcat. Verifică conexiunea.';
+    document.getElementById('loadingStatus').style.color = '#e74c3c';
+}
 
 let webrInstance = null;
 let isInitialized = false;
@@ -18,14 +20,13 @@ async function initWebR() {
             status.style.color = '#666';
         }
         
-        // Creează instanța WebR cu opțiuni - DEZACTIVEAZĂ SERVICE WORKER
-        webrInstance = new WebR({
-            // Dezactivează ServiceWorker pentru a evita eroarea 404
-            serviceWorkerUrl: null,
-            // Sau folosește această variantă:
-            // baseUrl: 'https://webr.r-wasm.org/v0.2.0/'
-        });
+        // Verifică dacă WebR există
+        if (typeof WebR === 'undefined') {
+            throw new Error('WebR nu este disponibil. Încearcă să reîmprospătezi pagina.');
+        }
         
+        // Creează instanța WebR
+        webrInstance = new WebR();
         await webrInstance.init();
         console.log('✅ WebR inițializat');
         
@@ -74,6 +75,10 @@ async function runRCode() {
     if (statusElement) statusElement.textContent = '⏳ Procesare...';
     
     try {
+        if (typeof WebR === 'undefined') {
+            throw new Error('WebR nu este disponibil. Reîmprospătează pagina.');
+        }
+        
         if (!webrInstance || !isInitialized) {
             console.log('⏳ WebR nu e gata, inițializez...');
             await initWebR();
