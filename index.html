@@ -5,8 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Analiză date cu R</title>
     
-    <!-- Folosim unpkg.com care funcționează mereu -->
-    <script src="https://unpkg.com/webr@0.1.0/dist/webr.js"></script>
+    <!-- Importmap pentru WebR -->
+    <script type="importmap">
+    {
+        "imports": {
+            "webr": "https://webr.r-wasm.org/v0.2.0/webr.mjs"
+        }
+    }
+    </script>
     
     <style>
         * {
@@ -159,6 +165,7 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <!-- Folosim type="module" -->
+    <script type="module" src="script.js"></script>
 </body>
 </html>
