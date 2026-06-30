@@ -5,7 +5,7 @@ async function initWebR() {
     try {
         if (!webrInstance) {
             webrInstance = new WebR();
-            await webrInstance.init();
+           await webrInstance.installPackages(['ggplot2', 'dplyr', 'tidyr']);
             console.log('WebR inițializat cu succes');
             
             // Încarcă pachetele necesare
