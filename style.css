@@ -18,7 +18,7 @@ body {
     background: white;
     border-radius: 20px;
     padding: 30px;
-    max-width: 800px;
+    max-width: 900px;
     width: 100%;
     box-shadow: 0 20px 60px rgba(0,0,0,0.3);
 }
@@ -47,6 +47,7 @@ input[type="text"] {
     border-radius: 8px;
     font-size: 16px;
     transition: border-color 0.3s;
+    margin-bottom: 10px;
 }
 
 input[type="text"]:focus {
@@ -54,23 +55,32 @@ input[type="text"]:focus {
     border-color: #667eea;
 }
 
-button {
+#runButton {
     width: 100%;
-    padding: 12px;
+    padding: 14px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     border: none;
     border-radius: 8px;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 600;
     cursor: pointer;
-    margin-top: 10px;
-    transition: transform 0.2s;
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
-button:hover {
+#runButton:hover {
     transform: translateY(-2px);
     box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+}
+
+#loadingStatus {
+    padding: 12px;
+    margin: 10px 0;
+    background: #f8f9fa;
+    border-radius: 8px;
+    color: #666;
+    font-weight: 500;
+    text-align: center;
 }
 
 #output {
@@ -88,7 +98,9 @@ button:hover {
     overflow-x: auto;
     font-family: 'Courier New', monospace;
     font-size: 14px;
-    min-height: 50px;
+    min-height: 80px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
 }
 
 #plotContainer {
@@ -103,4 +115,9 @@ button:hover {
     justify-content: center;
     align-items: center;
     min-height: 100px;
+}
+
+#plotOutput svg {
+    max-width: 100%;
+    height: auto;
 }
