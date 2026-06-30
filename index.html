@@ -5,14 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aplicație R cu WebR</title>
     
-    <!-- ÎNCARCĂ WEBR DIRECT - fără CDN problematic -->
-    <script type="importmap">
-    {
-        "imports": {
-            "webr": "https://webr.r-wasm.org/v0.2.0/webr.mjs"
-        }
-    }
-    </script>
+   
+   <!-- Înlocuiți importmap cu acest script -->
+<script src="https://webr.r-wasm.org/v0.2.0/webr.js"></script>
+<script>
+    // Expune WebR global
+    window.WebR = WebR;
+</script>
     
     <link rel="stylesheet" href="style.css">
 </head>
