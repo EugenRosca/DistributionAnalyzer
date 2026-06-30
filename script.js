@@ -1,11 +1,18 @@
-console.log('🔥 SCRIPT ÎNCĂRCAT - versiunea corectată');
+console.log('🔥 Script încărcat');
+
+// Verifică dacă WebR este disponibil
+if (typeof WebR === 'undefined') {
+    console.error('❌ WebR nu este definit! Verifică încărcarea CDN-ului.');
+    document.getElementById('loadingStatus').textContent = '❌ Eroare: WebR nu s-a încărcat. Verifică conexiunea.';
+    document.getElementById('loadingStatus').style.color = '#e74c3c';
+}
 
 let webrInstance = null;
 let isInitialized = false;
 
 // Funcția runRCode disponibilă GLOBAL
 window.runRCode = async function() {
-    console.log('▶️ runRCode() apelat de buton');
+    console.log('▶️ runRCode() apelat');
     
     const resultElement = document.getElementById('result');
     const plotElement = document.getElementById('plotOutput');
@@ -21,14 +28,15 @@ window.runRCode = async function() {
     if (statusElement) statusElement.textContent = '⏳ Procesare...';
     
     try {
-        // Verifică dacă WebR e inițializat
+        if (typeof WebR === 'undefined') {
+            throw new Error('WebR nu este disponibil. Verifică conexiunea la internet.');
+        }
+        
         if (!webrInstance || !isInitialized) {
             console.log('⏳ WebR nu e gata, inițializez...');
             await initWebR();
             if (!webrInstance || !isInitialized) {
-                resultElement.textContent = '❌ WebR nu a putut fi inițializat';
-                if (statusElement) statusElement.textContent = '❌ Eroare';
-                return;
+                throw new Error('WebR nu a putut fi inițializat');
             }
         }
         
@@ -37,15 +45,13 @@ window.runRCode = async function() {
         if (inputField) {
             inputValue = inputField.value || inputValue;
             console.log('📥 Input:', inputValue);
-        } else {
-            console.warn('⚠️ Elementul #userInput nu există, folosesc valori implicite');
         }
         
         const numbers = inputValue.split(',')
             .map(x => parseFloat(x.trim()))
             .filter(x => !isNaN(x));
         
-        console.log('📊 Numere procesate:', numbers);
+        console.log('📊 Numere:', numbers);
         
         if (numbers.length === 0) {
             resultElement.textContent = '⚠️ Introdu cel puțin un număr valid!';
@@ -53,7 +59,7 @@ window.runRCode = async function() {
             return;
         }
         
-        // COD R
+        // COD R SIMPLIFICAT (FĂRĂ PACHETE EXTERNE INITIAL)
         const rCode = `
             # Datele utilizatorului
             data <- data.frame(
@@ -82,26 +88,26 @@ window.runRCode = async function() {
                 "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
             )
             
-            # Grafic
-            library(ggplot2)
-            p <- ggplot(data, aes(x = x, y = y)) +
-                geom_line(color = "#4A90D9", size = 1.2) +
-                geom_point(color = "#E74C3C", size = 4) +
-                geom_hline(yintercept = media, linetype = "dashed", 
-                          color = "#2ECC71", size = 0.8) +
-                labs(
-                    title = "📈 Graficul datelor introduse",
-                    subtitle = paste("Media =", round(media, 2)),
-                    x = "Index observație",
-                    y = "Valoare"
-                ) +
-                theme_minimal() +
-                theme(
-                    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
-                    plot.subtitle = element_text(hjust = 0.5, size = 12, color = "#555")
-                )
-            
-            ggsave("plot.svg", p, width = 10, height = 6)
+            # Grafic simplu (fără ggplot2, folosind base R)
+            svg("plot.svg", width = 10, height = 6)
+            plot(data$x, data$y, 
+                 type = "b", 
+                 col = "blue", 
+                 pch = 19, 
+                 cex = 1.5,
+                 main = "Graficul datelor introduse",
+                 xlab = "Index observație",
+                 ylab = "Valoare",
+                 col.main = "#2c3e50",
+                 font.main = 2)
+            abline(h = media, col = "green", lty = 2, lwd = 2)
+            legend("topright", 
+                   legend = c("Date", paste("Media =", round(media, 2))),
+                   col = c("blue", "green"),
+                   lty = c(1, 2),
+                   pch = c(19, NA),
+                   lwd = c(1, 2))
+            dev.off()
             
             list(
                 text = rezultat,
@@ -113,14 +119,11 @@ window.runRCode = async function() {
         const result = await webrInstance.evalR(rCode);
         console.log('✅ Cod R executat');
         
-        // Extrage rezultatele
         const textResult = await result.get('text');
         const plotSVG = await result.get('plot');
         
-        console.log('📝 Rezultat text primit');
-        console.log('🎨 Grafic lungime:', plotSVG ? plotSVG.length : 0);
+        console.log('📝 Rezultat primit');
         
-        // Afișează rezultatul
         if (resultElement) {
             resultElement.textContent = textResult || 'Nu s-a primit rezultat';
         }
@@ -132,7 +135,10 @@ window.runRCode = async function() {
             plotElement.innerHTML = '<p style="color:orange;">⚠️ Graficul nu a fost generat</p>';
         }
         
-        if (statusElement) statusElement.textContent = '✅ Gata!';
+        if (statusElement) {
+            statusElement.textContent = '✅ Gata!';
+            statusElement.style.color = '#2ECC71';
+        }
         console.log('✅ Proces complet');
         
     } catch (error) {
@@ -142,6 +148,7 @@ window.runRCode = async function() {
         }
         if (statusElement) {
             statusElement.textContent = '❌ Eroare: ' + error.message;
+            statusElement.style.color = '#e74c3c';
         }
     }
 };
@@ -151,15 +158,23 @@ async function initWebR() {
     console.log('🔄 Inițializez WebR...');
     try {
         const status = document.getElementById('loadingStatus');
-        if (status) status.textContent = '⏳ Inițializare WebR... (10-20 secunde)';
+        if (status) {
+            status.textContent = '⏳ Inițializare WebR... (10-20 secunde)';
+            status.style.color = '#666';
+        }
+        
+        // Verifică dacă WebR există
+        if (typeof WebR === 'undefined') {
+            throw new Error('WebR nu este disponibil. Verifică conexiunea la internet și reîmprospătează pagina.');
+        }
         
         webrInstance = new WebR();
         await webrInstance.init();
         console.log('✅ WebR inițializat');
         
-        if (status) status.textContent = '⏳ Instalez ggplot2... (5-10 secunde)';
-        await webrInstance.installPackages(['ggplot2']);
-        console.log('✅ ggplot2 instalat');
+        if (status) {
+            status.textContent = '⏳ Se pregătește...';
+        }
         
         isInitialized = true;
         
@@ -191,11 +206,6 @@ async function initWebR() {
 // Pornește la încărcare
 window.addEventListener('load', function() {
     console.log('🚀 Pagina încărcată');
-    const status = document.getElementById('loadingStatus');
-    if (status) {
-        status.textContent = '⏳ Încarcă WebR...';
-        status.style.color = '#666';
-    }
     
     // Adaugă event listener pentru buton
     const button = document.getElementById('runButton');
@@ -206,6 +216,17 @@ window.addEventListener('load', function() {
         console.warn('⚠️ Butonul #runButton nu există');
     }
     
+    // Verifică dacă WebR e definit
+    if (typeof WebR === 'undefined') {
+        console.error('❌ WebR NU este definit!');
+        const status = document.getElementById('loadingStatus');
+        if (status) {
+            status.textContent = '❌ Eroare: WebR nu s-a încărcat. Verifică conexiunea la internet.';
+            status.style.color = '#e74c3c';
+        }
+        return;
+    }
+    
     // Inițializează WebR
     setTimeout(() => {
         initWebR();
@@ -213,3 +234,4 @@ window.addEventListener('load', function() {
 });
 
 console.log('✅ Script încărcat complet');
+console.log('📌 WebR disponibil:', typeof WebR !== 'undefined' ? '✅ Da' : '❌ Nu');
