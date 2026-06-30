@@ -9,21 +9,25 @@
 </head>
 <body>
     <div class="container">
-        <h1>📊 Aplicație R cu WebR</h1>
+        <h1>📊 Analiză date cu R</h1>
         
         <div class="input-section">
             <label for="userInput">Introdu datele (separate prin virgulă):</label>
-            <input type="text" id="userInput" placeholder="ex: 1,2,3,4,5" value="1,2,3,4,5,6,7,8,9,10">
-            <button onclick="runRCode()">Rulează R</button>
+            <input type="text" id="userInput" placeholder="ex: 12,45,63,78,43,15,45" value="12,45,63,78,43,15,45">
+            <button id="runButton">🚀 Rulează R</button>
+        </div>
+
+        <div id="loadingStatus">
+            ⏳ Se încarcă WebR...
         </div>
 
         <div id="output">
-            <h3>Rezultat:</h3>
+            <h3>📊 Rezultat:</h3>
             <pre id="result">Așteaptă rularea...</pre>
         </div>
 
         <div id="plotContainer">
-            <h3>Grafic generat în R:</h3>
+            <h3>📈 Grafic generat în R:</h3>
             <div id="plotOutput"></div>
         </div>
     </div>
