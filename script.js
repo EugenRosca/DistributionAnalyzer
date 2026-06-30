@@ -1,238 +1,175 @@
-// Import WebR ca modul
-import { WebR } from 'webr';
+// Inspirat din articolul R-bloggers
+console.log('🚀 Pornire aplicație...');
 
-console.log('🔥 Script încărcat ca modul');
-console.log('📌 WebR importat:', typeof WebR);
+// Configurare WebR cu Shiny
+const config = { 
+    packages: ['ggplot2', 'dplyr', 'tidyr'] 
+};
 
-let webrInstance = null;
-let isInitialized = false;
+// Variabile globale
+let webR;
+let shinyApp;
 
-// Funcția de inițializare
+// Inițializare WebR
 async function initWebR() {
-    console.log('🔄 Inițializez WebR...');
     try {
         const status = document.getElementById('loadingStatus');
-        if (status) {
-            status.textContent = '⏳ Inițializare WebR... (10-20 secunde)';
-            status.style.color = '#666';
-        }
+        status.textContent = '⏳ Încărcare WebR... (10-20 sec)';
         
         // Creează instanța WebR
-        console.log('🔄 Creez instanță WebR...');
-        webrInstance = new WebR();
-        await webrInstance.init();
-        console.log('✅ WebR inițializat');
+        webR = new WebR();
+        await webR.init();
         
-        isInitialized = true;
+        status.textContent = '⏳ Instalare pachete...';
         
-        if (status) {
-            status.textContent = '✅ Gata! Apasă "Rulează R" pentru a începe';
-            status.style.color = '#2ECC71';
-        }
+        // Instalează pachetele necesare
+        await webR.installPackages(['ggplot2', 'dplyr', 'tidyr']);
         
-        console.log('✅ Totul e gata!');
+        status.textContent = '✅ WebR gata! Apasă butonul.';
+        status.style.color = 'green';
+        console.log('✅ WebR inițializat cu succes');
         
         // Rulează automat după 2 secunde
-        setTimeout(() => {
-            console.log('🔄 Rulează exemplul automat...');
-            runRCode();
-        }, 2000);
+        setTimeout(runRCode, 1000);
         
-        return webrInstance;
+        return webR;
     } catch (error) {
         console.error('❌ Eroare inițializare:', error);
-        const status = document.getElementById('loadingStatus');
-        if (status) {
-            status.textContent = '❌ Eroare: ' + error.message;
-            status.style.color = '#E74C3C';
-        }
+        document.getElementById('loadingStatus').innerHTML = 
+            '<span style="color:red;">❌ Eroare: ' + error.message + '</span>';
         return null;
     }
 }
 
-// Funcția principală
+// Funcția principală - inspirată din exemplul Shiny
 async function runRCode() {
-    console.log('▶️ runRCode() apelat');
+    console.log('▶️ Rulează R');
     
-    const resultElement = document.getElementById('result');
-    const plotElement = document.getElementById('plotOutput');
-    const statusElement = document.getElementById('loadingStatus');
+    const resultDiv = document.getElementById('result');
+    const plotDiv = document.getElementById('plotOutput');
+    const statusDiv = document.getElementById('loadingStatus');
     const inputField = document.getElementById('userInput');
     
-    if (!resultElement) {
-        console.error('❌ Elementul #result nu există!');
-        return;
-    }
-    
-    resultElement.textContent = '⏳ Se procesează...';
-    if (statusElement) statusElement.textContent = '⏳ Procesare...';
+    resultDiv.textContent = '⏳ Procesare...';
     
     try {
-        if (!webrInstance || !isInitialized) {
-            console.log('⏳ WebR nu e gata, inițializez...');
+        if (!webR) {
             await initWebR();
-            if (!webrInstance || !isInitialized) {
-                throw new Error('WebR nu a putut fi inițializat');
-            }
+            if (!webR) throw new Error('WebR nu e disponibil');
         }
         
-        // IA DATELE DIN INPUT
-        let inputValue = '12,45,63,78,43,15,45';
-        if (inputField) {
-            inputValue = inputField.value || inputValue;
-            console.log('📥 Input:', inputValue);
-        }
-        
-        const numbers = inputValue.split(',')
-            .map(x => parseFloat(x.trim()))
-            .filter(x => !isNaN(x));
-        
-        console.log('📊 Numere:', numbers);
+        // Ia datele din input
+        const input = inputField.value || '12,45,63,78,43,15,45';
+        const numbers = input.split(',').map(x => parseFloat(x.trim())).filter(x => !isNaN(x));
         
         if (numbers.length === 0) {
-            resultElement.textContent = '⚠️ Introdu cel puțin un număr valid!';
-            if (statusElement) statusElement.textContent = '⚠️ Date invalide';
+            resultDiv.textContent = '⚠️ Introdu numere valide!';
             return;
         }
         
-        // COD R
-        const rCode = `
-            # Datele utilizatorului
+        console.log('📊 Date:', numbers);
+        
+        // Cod R - folosind tidyverse și ggplot2
+        const code = `
+            library(ggplot2)
+            library(dplyr)
+            library(tidyr)
+            
+            # Date
             data <- data.frame(
-                x = 1:${numbers.length},
-                y = c(${numbers.join(',')})
+                index = 1:${numbers.length},
+                value = c(${numbers.join(',')})
             )
             
-            # Calcule statistice
-            media <- mean(data$y)
-            mediana <- median(data$y)
-            suma <- sum(data$y)
-            n <- nrow(data)
-            sd_val <- sd(data$y)
+            # Statistici
+            stats <- data %>%
+                summarise(
+                    n = n(),
+                    suma = sum(value),
+                    media = mean(value),
+                    mediana = median(value),
+                    sd = sd(value),
+                    min = min(value),
+                    max = max(value),
+                    range = max(value) - min(value)
+                )
             
             # Rezultat text
-            rezultat <- paste(
+            text <- paste(
                 "📊 STATISTICI DESCRIPTIVE\n",
                 "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n",
-                "📈 Număr observații: ", n, "\n",
-                "📊 Suma: ", round(suma, 2), "\n",
-                "📊 Media: ", round(media, 2), "\n",
-                "📊 Mediana: ", round(mediana, 2), "\n",
-                "📊 Deviație standard: ", round(sd_val, 2), "\n",
-                "📊 Minim: ", min(data$y), "\n",
-                "📊 Maxim: ", max(data$y), "\n",
-                "📊 Range: ", round(max(data$y) - min(data$y), 2), "\n",
+                "📈 Număr observații: ", stats$n, "\n",
+                "📊 Suma: ", round(stats$suma, 2), "\n",
+                "📊 Media: ", round(stats$media, 2), "\n",
+                "📊 Mediana: ", round(stats$mediana, 2), "\n",
+                "📊 Deviație standard: ", round(stats$sd, 2), "\n",
+                "📊 Minim: ", round(stats$min, 2), "\n",
+                "📊 Maxim: ", round(stats$max, 2), "\n",
+                "📊 Range: ", round(stats$range, 2), "\n",
                 "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
             )
             
-            # Grafic cu base R
-            svg("plot.svg", width = 10, height = 6)
+            # Grafic ggplot2
+            p <- ggplot(data, aes(x = index, y = value)) +
+                geom_line(color = "#4A90D9", size = 1.2) +
+                geom_point(color = "#E74C3C", size = 4) +
+                geom_hline(yintercept = stats$media, 
+                          linetype = "dashed", 
+                          color = "#2ECC71", 
+                          size = 0.8) +
+                labs(
+                    title = "📈 Graficul datelor introduse",
+                    subtitle = paste("Media =", round(stats$media, 2)),
+                    x = "Index observație",
+                    y = "Valoare"
+                ) +
+                theme_minimal() +
+                theme(
+                    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+                    plot.subtitle = element_text(hjust = 0.5, size = 12, color = "#555"),
+                    panel.grid.minor = element_blank()
+                )
             
-            # Setează margini
-            par(mar = c(5, 5, 4, 2))
+            # Salvează graficul
+            ggsave("plot.svg", p, width = 10, height = 6, dpi = 100)
             
-            # Creează graficul
-            plot(data$x, data$y, 
-                 type = "b", 
-                 col = "#4A90D9", 
-                 pch = 19, 
-                 cex = 1.5,
-                 lwd = 2,
-                 main = "📈 Graficul datelor introduse",
-                 xlab = "Index observație",
-                 ylab = "Valoare",
-                 col.main = "#2c3e50",
-                 font.main = 2,
-                 cex.main = 1.5,
-                 cex.lab = 1.2,
-                 cex.axis = 1.1)
-            
-            # Adaugă linia pentru medie
-            abline(h = media, col = "#2ECC71", lty = 2, lwd = 2.5)
-            
-            # Adaugă legendă
-            legend("topright", 
-                   legend = c("Date", paste("Media =", round(media, 2))),
-                   col = c("#4A90D9", "#2ECC71"),
-                   lty = c(1, 2),
-                   pch = c(19, NA),
-                   lwd = c(2, 2.5),
-                   bg = "white",
-                   cex = 1.1)
-            
-            # Adaugă grid
-            grid(nx = NULL, ny = NULL, col = "#E8E8E8", lty = 1)
-            
-            dev.off()
-            
-            # Citește SVG-ul
             list(
-                text = rezultat,
+                text = text,
                 plot = readLines("plot.svg", warn = FALSE)
             )
         `;
         
         console.log('🔧 Execut cod R...');
-        const result = await webrInstance.evalR(rCode);
-        console.log('✅ Cod R executat');
+        const result = await webR.evalR(code);
         
-        const textResult = await result.get('text');
-        const plotSVG = await result.get('plot');
+        const text = await result.get('text');
+        const plot = await result.get('plot');
         
-        console.log('📝 Rezultat primit');
+        resultDiv.textContent = text;
         
-        if (resultElement) {
-            resultElement.textContent = textResult || 'Nu s-a primit rezultat';
-        }
-        
-        if (plotElement && plotSVG && plotSVG.length > 0) {
-            let svgContent = plotSVG.join('\n');
+        if (plot && plot.length > 0) {
+            let svgContent = plot.join('\n');
             svgContent = svgContent.replace(/[\x00-\x1F\x7F-\x9F]/g, '');
-            plotElement.innerHTML = svgContent;
+            plotDiv.innerHTML = svgContent;
             console.log('✅ Grafic afișat');
-        } else if (plotElement) {
-            plotElement.innerHTML = '<p style="color:orange;">⚠️ Graficul nu a fost generat</p>';
+        } else {
+            plotDiv.innerHTML = '<p style="color:orange;">Graficul nu a fost generat</p>';
         }
         
-        if (statusElement) {
-            statusElement.textContent = '✅ Gata!';
-            statusElement.style.color = '#2ECC71';
-        }
-        console.log('✅ Proces complet');
+        statusDiv.textContent = '✅ Gata!';
+        console.log('✅ Complet');
         
     } catch (error) {
         console.error('❌ Eroare:', error);
-        if (resultElement) {
-            resultElement.textContent = '❌ Eroare: ' + error.message;
-        }
-        if (statusElement) {
-            statusElement.textContent = '❌ Eroare: ' + error.message;
-            statusElement.style.color = '#e74c3c';
-        }
+        resultDiv.textContent = '❌ Eroare: ' + error.message;
+        statusDiv.innerHTML = '<span style="color:red;">❌ Eroare: ' + error.message + '</span>';
     }
 }
 
-// Expune funcția global pentru buton
-window.runRCode = runRCode;
+// Buton
+document.getElementById('runButton').addEventListener('click', runRCode);
 
-// Pornește la încărcare
-console.log('🚀 Inițializare aplicație...');
+// Pornește
+setTimeout(initWebR, 500);
 
-// Adaugă event listener pentru buton
-const button = document.getElementById('runButton');
-if (button) {
-    button.addEventListener('click', () => {
-        console.log('🖱️ Buton apăsat');
-        runRCode();
-    });
-    console.log('✅ Buton configurat');
-} else {
-    console.warn('⚠️ Butonul #runButton nu există');
-}
-
-// Inițializează WebR
-setTimeout(() => {
-    initWebR();
-}, 1000);
-
-console.log('✅ Script încărcat complet');
+console.log('✅ Script gata');
