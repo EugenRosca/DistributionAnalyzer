@@ -1,5 +1,5 @@
 // Folosește import pentru WebR
-import { WebR } from 'webr';
+const { WebR } = window;
 
 console.log('🔥 Script încărcat cu import WebR');
 
