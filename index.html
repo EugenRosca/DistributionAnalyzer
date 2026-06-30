@@ -5,13 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Analiză date cu R</title>
     
-    <script type="importmap">
-    {
-        "imports": {
-            "webr": "https://webr.r-wasm.org/v0.2.0/webr.mjs"
-        }
-    }
-    </script>
+    <!-- Folosim CDN direct, nu importmap -->
+    <script src="https://cdn.jsdelivr.net/npm/webr@0.2.0/dist/webr.js"></script>
     
     <style>
         * {
@@ -164,6 +159,7 @@
         </div>
     </div>
 
-    <script type="module" src="script.js"></script>
+    <!-- Script normal, nu module -->
+    <script src="script.js"></script>
 </body>
 </html>
