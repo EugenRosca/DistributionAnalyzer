@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplicație R cu WebR</title>
+    <title>Test WebR</title>
     
-    <!-- Configurare import pentru WebR -->
     <script type="importmap">
     {
         "imports": {
@@ -13,159 +12,32 @@
         }
     }
     </script>
-    
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .container {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            max-width: 900px;
-            width: 100%;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-
-        h1 {
-            color: #333;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .input-section {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #555;
-        }
-
-        input[type="text"] {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-            margin-bottom: 10px;
-        }
-
-        input[type="text"]:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        #runButton {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        #runButton:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        #loadingStatus {
-            padding: 12px;
-            margin: 10px 0;
-            background: #f8f9fa;
-            border-radius: 8px;
-            color: #666;
-            font-weight: 500;
-            text-align: center;
-        }
-
-        #output {
-            margin-top: 20px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-        }
-
-        #result {
-            background: #2d2d2d;
-            color: #f8f8f8;
-            padding: 15px;
-            border-radius: 8px;
-            overflow-x: auto;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            min-height: 80px;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-        }
-
-        #plotContainer {
-            margin-top: 20px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-        }
-
-        #plotOutput {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100px;
-        }
-
-        #plotOutput svg {
-            max-width: 100%;
-            height: auto;
-        }
-    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>📊 Analiză date cu R</h1>
+    <div style="max-width:800px;margin:50px auto;padding:20px;font-family:Arial;">
+        <h1>🧪 Test WebR</h1>
         
-        <div class="input-section">
-            <label for="userInput">Introdu datele (separate prin virgulă):</label>
-            <input type="text" id="userInput" placeholder="ex: 12,45,63,78,43,15,45" value="12,45,63,78,43,15,45">
-            <button id="runButton">🚀 Rulează R</button>
-        </div>
-
-        <div id="loadingStatus">
+        <div id="status" style="padding:15px;background:#f0f0f0;border-radius:8px;margin:10px 0;">
             ⏳ Se încarcă WebR...
         </div>
-
-        <div id="output">
-            <h3>📊 Rezultat:</h3>
-            <pre id="result">Așteaptă rularea...</pre>
+        
+        <div style="margin:20px 0;">
+            <label>Introdu date (separate prin virgulă):</label><br>
+            <input type="text" id="userInput" value="1,2,3,4,5" style="width:100%;padding:10px;margin:10px 0;border:2px solid #ddd;border-radius:5px;">
+            <button id="runButton" style="width:100%;padding:15px;background:#667eea;color:white;border:none;border-radius:5px;font-size:18px;cursor:pointer;">
+                🚀 Rulează R
+            </button>
         </div>
-
-        <div id="plotContainer">
-            <h3>📈 Grafic generat în R:</h3>
-            <div id="plotOutput"></div>
+        
+        <div id="result" style="padding:15px;background:#2d2d2d;color:#f8f8f8;border-radius:8px;min-height:100px;white-space:pre-wrap;font-family:'Courier New',monospace;">
+            Așteaptă...
+        </div>
+        
+        <div id="plotOutput" style="margin-top:20px;padding:20px;background:#f8f9fa;border-radius:8px;min-height:100px;">
+            <p style="color:#666;">Graficul va apărea aici</p>
         </div>
     </div>
 
-    <!-- Folosește type="module" pentru import -->
     <script type="module" src="script.js"></script>
 </body>
 </html>
