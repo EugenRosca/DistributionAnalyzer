@@ -4,7 +4,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aplicație R cu WebR</title>
-    <script src="https://cdn.jsdelivr.net/npm/webr@0.2.0/dist/webr.js"></script>
+    
+    <!-- Încarcă WebR din surse multiple -->
+    <script>
+        // Fallback pentru WebR
+        function loadWebR() {
+            return new Promise((resolve, reject) => {
+                const sources = [
+                    'https://cdn.jsdelivr.net/npm/webr@0.2.0/dist/webr.js',
+                    'https://unpkg.com/webr@0.2.0/dist/webr.js',
+                    'https://cdnjs.cloudflare.com/ajax/libs/webr/0.2.0/webr.min.js'
+                ];
+                
+                let loaded = false;
+                
+                sources.forEach(src => {
+                    const script = document.createElement('script');
+                    script.src = src;
+                    script.onload = () => {
+                        if (!loaded) {
+                            loaded = true;
+                            console.log('✅ WebR încărcat din:', src);
+                            resolve();
+                        }
+                    };
+                    script.onerror = () => {
+                        console.warn('⚠️ Nu s-a putut încărca:', src);
+                    };
+                    document.head.appendChild(script);
+                });
+                
+                // Timeout după 10 secunde
+                setTimeout(() => {
+                    if (!loaded) {
+                        reject(new Error('WebR nu s-a încărcat după 10 secunde'));
+                    }
+                }, 10000);
+            });
+        }
+        
+        // Încarcă WebR înainte de orice altceva
+        loadWebR().catch(err => {
+            console.error('❌ Eroare încărcare WebR:', err);
+            document.body.innerHTML = `
+                <div style="padding: 20px; text-align: center; font-family: Arial;">
+                    <h1 style="color: #e74c3c;">❌ Eroare</h1>
+                    <p>WebR nu s-a putut încărca. Verifică conexiunea la internet.</p>
+                    <p style="color: #666; font-size: 14px;">Eroare: ${err.message}</p>
+                    <button onclick="location.reload()" style="padding: 10px 20px; margin-top: 20px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                        🔄 Reîncearcă
+                    </button>
+                </div>
+            `;
+        });
+    </script>
+    
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
